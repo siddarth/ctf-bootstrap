@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require File.expand_path('ctf_bootstrap', File.dirname(__FILE__))
+
+options = {}
+optparse = OptionParser.new do |opts|
+  opts.banner = "Usage: ./bootstrap [options]"
+
+  opts.on("-c", "--config FILENAME",
+          "Specify configuration file for bootstrap.") do |config_file|
+    options[:config] = config_file
+  end
+
+  opts.on( '-h', '--help', 'Display this message' ) do
+    puts optparse
+    exit
+  end
+end
+optparse.parse!
+
+# make sure config is specified
+if options[:config].nil?
+  puts 'Required argument: config'
+  puts optparse
+  exit(-1)
+end
+
+config = File.expand_path(options[:config], File.dirname(__FILE__))
+
+CTFBootstrap.run! config
