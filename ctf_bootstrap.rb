@@ -22,12 +22,23 @@ class CTFBootstrap
 
   # create users, set up passwords
   def self.setup_users()
-    usernames.each { |user| execute "useradd #{user}" }
-    stdin = usernames.zip(passwords).map { |s| s.join(":") }.join("\n") + "\n"
-    print_info stdin.split("\n").join('\n')
-    execute('chpasswd', {:stdin => Subprocess::PIPE}) do |pid, io, x, y|
-      io.write("#{stdin}")
+    print_info "creating users..."
+    usernames.each { |user| execute("useradd #{user}") }
+    print_info "users created: #{usernames.join(', ')}..."
+
+    input = usernames.zip(passwords).map { |s| s.join(":") }.join("\n")
+    print_info "setting up user passwords..."
+    execute('chpasswd', {:stdin => Subprocess::PIPE}) do |i, cmdin, o, e|
+      cmdin.write("#{input}\n")
     end
+    print_info "passwords set..."
+  end
+
+  # deletes all users related to ctf.
+  def self.delete_all_users()
+    print_info "deleting users: #{usernames.join(' ')}..."
+    usernames.each { |user| execute("userdel #{user}") }
+    print_info "deleted users: #{usernames.join(' ')}..."
   end
 
   # set up code
@@ -42,7 +53,7 @@ class CTFBootstrap
       out = 42
       unless $DEBUG
         begin
-          out = Subprocess.run([cmd], opts)
+          out = Subprocess.run(cmd, opts)
           print_cmd_error(cmd, out[2]) if out[2] != ''
           out
         rescue Exception => e

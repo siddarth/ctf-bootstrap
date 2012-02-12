@@ -16,6 +16,11 @@ optparse = OptionParser.new do |opts|
     puts optparse
     exit
   end
+
+  options[:delete] = false
+  opts.on( '-d', '--delete-all', 'Delete all level users on this system') do
+    options[:delete] = true
+  end
 end
 optparse.parse!
 
@@ -24,6 +29,11 @@ if options[:config].nil?
   puts 'Required argument: config'
   puts optparse
   exit(-1)
+end
+
+if options[:delete] == true
+  CTFBootstrap.delete_all_users()
+  exit(0)
 end
 
 config = File.expand_path(options[:config], File.dirname(__FILE__))
