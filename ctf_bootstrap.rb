@@ -16,7 +16,11 @@ class CTFBootstrap
     @@config = YAML.load_file(config)
     print_info "deleting users: #{usernames.join(' ')}..."
     usernames.each { |user| execute("userdel #{user}") }
-    print_info "deleted users: #{usernames.join(' ')}..."
+    print_info "deleted users: #{usernames.join(' ')}."
+
+    print_info "deleting homedirs..."
+    usernames.each { |user| execute("rm -rf /home/#{user}") }
+    print_info "deleted homedirs."
   end
 
 #  private
@@ -83,7 +87,7 @@ class CTFBootstrap
     passwds = @@config['passwords']
     print_error("Not enough passwords specified in config.") unless passwds.length == n
     password_hash = Hash.new
-    usernames.each_with_index { |u, i| password_hash[u] = passwd[i] }
+    usernames.each_with_index { |u, i| password_hash[u] = passwds[i] }
     password_hash
   end
 
