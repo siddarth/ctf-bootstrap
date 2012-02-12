@@ -30,11 +30,19 @@ class CTFBootstrap
 
   # create users, set up passwords
   def self.setup_users()
-    print_info "creating users..."
-    usernames.each { |user| execute("useradd #{user}") }
+    print_info "creating users and home dirs..."
+    usernames.each do |user|
+      execute("useradd #{user}")
+      execute("mkdir /home/#{user}")
+      execute("chown #{user} /home/#{user}")
+    end
+    usernames[0..-2].each_with_index do |user, i|
+      execute("echo #{passwords[user + 1]} > /home/#{usernames[i]}/.password")
+      execute("chown #{user} /home/#{usernames[i]}/.password")
+    end
     print_info "users created: #{usernames.join(', ')}..."
 
-    input = usernames.zip(passwords).map { |s| s.join(":") }.join("\n")
+    input = passwords.map { |u, p| "#{u}:#{p}" }.join("\n")
     print_info "setting up user passwords..."
     Subprocess.popen('chpasswd', {:stdin => Subprocess::PIPE}) do |p, i, o, e|
       i.write("#{input}\n")
@@ -74,7 +82,9 @@ class CTFBootstrap
   def self.passwords
     passwds = @@config['passwords']
     print_error("Not enough passwords specified in config.") unless passwds.length == n
-    passwds
+    password_hash = Hash.new
+    usernames.each_with_index { |u, i| password_hash[u] = passwd[i] }
+    password_hash
   end
 
 
