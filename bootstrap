@@ -31,11 +31,12 @@ if options[:config].nil?
   exit(-1)
 end
 
+config = File.expand_path(options[:config], File.dirname(__FILE__))
+
 if options[:delete] == true
-  CTFBootstrap.delete_all_users()
+  CTFBootstrap.delete_all_users(config)
   exit(0)
 end
 
-config = File.expand_path(options[:config], File.dirname(__FILE__))
 
 CTFBootstrap.run! config

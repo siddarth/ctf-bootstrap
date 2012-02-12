@@ -1,4 +1,5 @@
-debug: true
+debug: false
 num_levels: 5
 code_path: 'code/'
+passwords: ['foo', 'bar', 'haa', 'baz', 'hello']
 username_prefix: 'level01'

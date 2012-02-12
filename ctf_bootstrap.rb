@@ -11,6 +11,14 @@ class CTFBootstrap
     setup_users()
   end
 
+  # deletes all users related to ctf.
+  def self.delete_all_users(config)
+    @@config = YAML.load_file(config)
+    print_info "deleting users: #{usernames.join(' ')}..."
+    usernames.each { |user| execute("userdel #{user}") }
+    print_info "deleted users: #{usernames.join(' ')}..."
+  end
+
 #  private
 
   def self.validate_config()
@@ -28,17 +36,11 @@ class CTFBootstrap
 
     input = usernames.zip(passwords).map { |s| s.join(":") }.join("\n")
     print_info "setting up user passwords..."
-    execute('chpasswd', {:stdin => Subprocess::PIPE}) do |i, cmdin, o, e|
-      cmdin.write("#{input}\n")
+    Subprocess.popen('chpasswd', {:stdin => Subprocess::PIPE}) do |p, i, o, e|
+      i.write("#{input}\n")
+      i.close()
     end
     print_info "passwords set..."
-  end
-
-  # deletes all users related to ctf.
-  def self.delete_all_users()
-    print_info "deleting users: #{usernames.join(' ')}..."
-    usernames.each { |user| execute("userdel #{user}") }
-    print_info "deleted users: #{usernames.join(' ')}..."
   end
 
   # set up code
