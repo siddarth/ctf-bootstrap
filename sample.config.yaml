@@ -1,0 +1,4 @@
+debug: true
+num_levels: 5
+code_path: 'code/'
+username_prefix: 'level01'
