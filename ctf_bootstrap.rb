@@ -34,15 +34,21 @@ class CTFBootstrap
 
   # create users, set up passwords
   def self.setup_users()
-    print_info "creating users and home dirs..."
+    print_info "creating users..."
     usernames.each do |user|
       execute("useradd #{user}")
+    end
+
+    print_info "creating user home dirs..."
+    usernames.each do |user|
       execute("mkdir /home/#{user}")
       execute("chown #{user} /home/#{user}")
     end
-    usernames[0..-2].each_with_index do |user, i|
-      execute("echo #{passwords[user + 1]} > /home/#{usernames[i]}/.password")
-      execute("chown #{user} /home/#{usernames[i]}/.password")
+
+    usernames.each_with_index do |user, i|
+      password = passwords[user]
+      execute("echo #{password} > /home/#{user}/.password")
+      execute("chown #{user} /home/#{user}/.password")
     end
     print_info "users created: #{usernames.join(', ')}..."
 
