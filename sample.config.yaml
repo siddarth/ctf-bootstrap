@@ -2,4 +2,12 @@ debug: false
 num_levels: 5
 code_path: 'code/'
 passwords: ['foo', 'bar', 'haa', 'baz', 'hello']
-username_prefix: 'level01'
+files:
+  01:
+    noexec: ['level01.c']
+    exec: ['level01']
+  02:
+    noexec: ['level02.c']
+    exec: ['level02']
+  03:
+    exec: ['level03.py']

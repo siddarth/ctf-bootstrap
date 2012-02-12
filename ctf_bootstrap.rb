@@ -9,6 +9,7 @@ class CTFBootstrap
     validate_config()
     print_info "setting up #{n} levels"
     setup_users()
+    setup_levels()
   end
 
   # deletes all users related to ctf.
@@ -20,6 +21,7 @@ class CTFBootstrap
 
     print_info "deleting homedirs..."
     usernames.each { |user| execute("rm -rf /home/#{user}") }
+    execute("rm -rf /levels")
     print_info "deleted homedirs."
   end
 
@@ -39,20 +41,12 @@ class CTFBootstrap
       execute("useradd #{user}")
     end
 
+    # home directory
     print_info "creating user home dirs..."
     usernames.each do |user|
       execute("mkdir /home/#{user}")
       execute("chown #{user} /home/#{user}")
     end
-
-    usernames.each_with_index do |user, i|
-      password = passwords[user]
-      password_file = "/home/#{user}/.password"
-      execute("echo #{password} > #{password_file}")
-      execute("chown #{user} #{password_file}")
-      execute("chmod 600 #{password_file}")
-    end
-    print_info "users created: #{usernames.join(', ')}..."
 
     input = passwords.map { |u, p| "#{u}:#{p}" }.join("\n")
     print_info "setting up user passwords..."
@@ -61,12 +55,38 @@ class CTFBootstrap
       i.close()
     end
     print_info "passwords set..."
+
+    # password files
+    usernames.each_with_index do |user, i|
+      password = passwords[user]
+      password_file = "/home/#{user}/.password"
+      execute("echo #{password} > #{password_file}")
+      execute("chown #{user} #{password_file}")
+      execute("chmod 600 #{password_file}")
+    end
+    print_info "users created: #{usernames.join(', ')}..."
   end
 
   # set up code
   def self.setup_levels()
-
+    execute("mkdir /levels")
+    code_dir = File.expand_path(@@config['code_path'], File.dirname(__FILE__))
+    @@config['files'].each do |level_no, files|
+      level = level_name(level_no)
+      next_level = level_name(level_no + 1)
+      {:exec => 500, :noexec => 400}.each do |category, perms|
+        unless files[category.to_s].nil?
+          files[category.to_s].each do |f|
+            execute("cp #{code_dir}/#{level}/#{f} /levels/.")
+            execute("chown #{next_level} /levels/#{f}")
+            execute("chmod #{perms} /levels/#{f}")
+          end
+        end
+      end
+    end
   end
+
+  def self.level_name(i); "level%02d" % i end
 
   # execute a command depending on debug mode
   # using the subprocess module in proc.rb
