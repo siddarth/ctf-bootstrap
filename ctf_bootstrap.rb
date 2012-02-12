@@ -47,8 +47,10 @@ class CTFBootstrap
 
     usernames.each_with_index do |user, i|
       password = passwords[user]
-      execute("echo #{password} > /home/#{user}/.password")
-      execute("chown #{user} /home/#{user}/.password")
+      password_file = "/home/#{user}/.password"
+      execute("echo #{password} > #{password_file}")
+      execute("chown #{user} #{password_file}")
+      execute("chmod 600 #{password_file}")
     end
     print_info "users created: #{usernames.join(', ')}..."
 
