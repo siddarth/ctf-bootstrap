@@ -1,6 +1,6 @@
 debug: false
 num_levels: 5
-code_path: 'code/'
+code_path: 'sample-code/'
 passwords: ['foo', 'bar', 'haa', 'baz', 'hello']
 files:
   01:
